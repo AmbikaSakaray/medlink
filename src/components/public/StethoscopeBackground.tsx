@@ -9,7 +9,6 @@ import { motion, useScroll, useTransform } from "motion/react";
  */
 
 function ECGStrip({ className }: { className?: string }) {
-  // One full-width strip — 1200 wide, 200 tall for a tall, visible waveform
   return (
     <svg
       viewBox="0 0 1200 200"
@@ -71,7 +70,7 @@ export function StethoscopeBackground() {
           className="flex"
           style={{ width: "200%" }}
           animate={{ x: [0, "-50%"] }}
-          transition={{ duration: 5, ease: "linear", repeat: Infinity }}
+          transition={{ duration: 30, ease: "linear", repeat: Infinity }}
         >
           <ECGStrip className="h-[120px] w-1/2 shrink-0" />
           <ECGStrip className="h-[120px] w-1/2 shrink-0" />
@@ -84,7 +83,7 @@ export function StethoscopeBackground() {
           className="flex"
           style={{ width: "200%" }}
           animate={{ x: ["-50%", 0] }}
-          transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+          transition={{ duration: 45, ease: "linear", repeat: Infinity }}
         >
           <ECGStrip className="h-[90px] w-1/2 shrink-0 scale-y-[-1]" />
           <ECGStrip className="h-[90px] w-1/2 shrink-0 scale-y-[-1]" />
