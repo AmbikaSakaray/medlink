@@ -27,13 +27,8 @@ export default function PublicNavbar() {
       className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6"
     >
       <nav
-        className={[
-          "mx-auto flex max-w-7xl items-center justify-between rounded-2xl px-4 py-3 transition-all duration-300 sm:px-6",
-          scrolled
-            ? "shadow-soft border border-white/20"
-            : "bg-transparent",
-        ].join(" ")}
-        style={scrolled ? { background: "oklch(0.88 0.04 210 / 0.92)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)" } : {}}
+      className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl px-4 py-3 transition-all duration-300 sm:px-6 shadow-soft border border-white/20"
+      style={{ background: "oklch(0.88 0.04 210 / 0.92)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)" }}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">

@@ -249,7 +249,7 @@
   -webkit-text-fill-color: transparent;
   animation: gradient-text 4.5s linear infinite;
 }
-.animate-ecg      { stroke-dasharray:700; animation: ecg 6s ease-out forwards; }
+.animate-ecg      { stroke-dasharray:700; animation: ecg 12s ease-out forwards; }
 .animate-ecg-loop { stroke-dasharray:700; animation: ecg-loop 18s linear infinite; }
 .animate-marquee  { animation: marquee 36s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
