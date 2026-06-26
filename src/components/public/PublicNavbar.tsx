@@ -27,8 +27,8 @@ export default function PublicNavbar() {
       className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6"
     >
       <nav
-      className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl px-4 py-3 transition-all duration-300 sm:px-6 shadow-soft border border-white/20"
-      style={{ background: "oklch(0.88 0.04 210 / 0.92)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)" }}
+        className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl px-4 py-3 transition-all duration-300 sm:px-6 shadow-soft border border-white/20"
+        style={{ background: "oklch(0.88 0.04 210 / 0.92)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)" }}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
@@ -102,7 +102,8 @@ export default function PublicNavbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mx-auto mt-2 max-w-7xl rounded-2xl glass p-4 shadow-soft lg:hidden"
+            className="mx-auto mt-2 max-w-7xl rounded-2xl p-4 shadow-soft border border-white/20 lg:hidden"
+            style={{ background: "oklch(0.88 0.04 210 / 0.97)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)" }}
           >
             <div className="flex flex-col gap-1">
               {publicNavLinks.map((l) => (
