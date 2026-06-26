@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /doctor/
+Disallow: /lab/
+Disallow: /pharmacy/queue
+Disallow: /billing/
+Disallow: /insurance/dashboard
+Disallow: /emergency/dashboard
+Disallow: /telemedicine/dashboard
+Disallow: /reception/
+Disallow: /super-admin/
+Disallow: /patient/dashboard
+Sitemap: https://www.medilinkhealth.com/sitemap.xml

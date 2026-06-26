@@ -1,0 +1,16 @@
+export type { Patient } from "./patient";
+export type { Appointment } from "./appointment";
+export type { Profile } from "./profile";
+export type { Department } from "./department";
+export type { Doctor } from "./doctor";
+export type { Prescription, PrescriptionItem, PrescriptionWithItems } from "./prescription";
+export type { ContactMessage } from "./contact";
+export type { MedicalRecord } from "./medical-record";
+export type { Medicine, Vendor, PharmacyOrder } from "./inventory";
+export type { LabTest, LabReport } from "./lab";
+export type { InsurancePolicy, InsuranceClaim } from "./insurance";
+export type { Invoice, Payment, Refund } from "./billing";
+export type { Bed } from "./bed";
+export type { TelemedicineSession } from "./telemedicine";
+export type { Notification } from "./notification";
+export type { AuditLog } from "./audit";
