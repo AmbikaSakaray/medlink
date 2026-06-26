@@ -249,8 +249,8 @@
   -webkit-text-fill-color: transparent;
   animation: gradient-text 4.5s linear infinite;
 }
-.animate-ecg      { stroke-dasharray:700; animation: ecg 40s ease-out forwards; }
-.animate-ecg-loop { stroke-dasharray:700; animation: ecg-loop 25s linear infinite; }
+.animate-ecg      { stroke-dasharray:700; animation: ecg 80s ease-out forwards; }
+.animate-ecg-loop { stroke-dasharray:700; animation: ecg-loop 40s linear infinite; }
 .animate-marquee  { animation: marquee 36s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 .animate-heartbeat { animation: heartbeat 1.6s ease-in-out infinite; }
