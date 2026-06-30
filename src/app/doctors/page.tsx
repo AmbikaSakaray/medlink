@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Search, Loader2, X, Calendar, Clock, Pill } from "lucide-react";
 import PublicNavbar from "@/components/public/PublicNavbar";
 import PublicFooter from "@/components/public/PublicFooter";
@@ -75,15 +76,17 @@ function formatTime(t: string | null) {
   return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-/* ── History Modal ── */
+/* ── History Modal — rendered via portal into document.body to escape
+   any transformed/filtered ancestors that break position:fixed ── */
 function HistoryModal({ onClose }: { onClose: () => void }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [notLoggedIn, setNotLoggedIn] = useState(false);
 
   useEffect(() => {
-    // block body scroll while modal is open
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
@@ -137,10 +140,10 @@ function HistoryModal({ onClose }: { onClose: () => void }) {
     fetchHistory();
   }, []);
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl bg-white shadow-2xl overflow-hidden">
@@ -302,6 +305,9 @@ function HistoryModal({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+
+  if (!mounted) return null;
+  return createPortal(modal, document.body);
 }
 
 /* ── Main Page ── */
