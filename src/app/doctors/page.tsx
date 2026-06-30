@@ -206,17 +206,25 @@ export default function DoctorsPage() {
                             <span>⭐</span>{doc.experience_years}+ Years Experience
                           </p>
                         </div>
-                        <div className="mt-5 flex items-center justify-between border-t border-border pt-4 gap-3">
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Consultation Fee</p>
-                            <p className="mt-0.5 font-display text-base sm:text-lg font-bold">৳{doc.consultation_fee}</p>
+                        <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Consultation Fee</p>
+                              <p className="mt-0.5 font-display text-base sm:text-lg font-bold">৳{doc.consultation_fee}</p>
+                            </div>
+                            <Link
+                              href={`/appointment?doc=${doc.id}`}
+                              className="flex-shrink-0 rounded-2xl px-4 sm:px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 whitespace-nowrap"
+                              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+                            >
+                              Book Visit
+                            </Link>
                           </div>
                           <Link
-                            href={`/appointment?doc=${doc.id}`}
-                            className="flex-shrink-0 rounded-2xl px-4 sm:px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 whitespace-nowrap"
-                            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+                            href={`/patient/dashboard?tab=appointments`}
+                            className="w-full rounded-2xl border border-border px-4 py-2.5 text-center text-sm font-bold text-foreground/80 transition hover:bg-primary/10 hover:text-primary"
                           >
-                            Book Visit
+                            View History
                           </Link>
                         </div>
                       </div>

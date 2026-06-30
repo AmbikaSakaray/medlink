@@ -151,13 +151,17 @@ function ResetPasswordInner() {
               <div className="relative">
                 <input
                   type={showPw ? "text" : "password"}
-                  placeholder="Min. 8 characters"
+                  placeholder="Enter your password"
                   className={`input-field pr-11 ${error && !confirm ? "border-red-400" : ""}`}
                   value={password}
+                  autoComplete="new-password"
                   onChange={e => { setPassword(e.target.value); setError(""); }}
                 />
-                <button type="button" onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)]">
+                <button
+                  type="button"
+                  onClick={() => setShowPw(v => !v)}
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg text-[var(--muted)] hover:bg-[var(--canvas)] hover:text-[var(--ink)] transition-colors">
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -169,13 +173,17 @@ function ResetPasswordInner() {
               <div className="relative">
                 <input
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Re-enter password"
+                  placeholder="Enter your password again"
                   className={`input-field pr-11 ${error ? "border-red-400" : ""}`}
                   value={confirm}
+                  autoComplete="new-password"
                   onChange={e => { setConfirm(e.target.value); setError(""); }}
                 />
-                <button type="button" onClick={() => setShowConfirm(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)]">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(v => !v)}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg text-[var(--muted)] hover:bg-[var(--canvas)] hover:text-[var(--ink)] transition-colors">
                   {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>

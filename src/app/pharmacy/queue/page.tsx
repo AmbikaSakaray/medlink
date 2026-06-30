@@ -440,7 +440,7 @@ export default function PharmacyQueuePage() {
         )}
 
         {activeTab === "vendors" && (
-          <div className="grid gap-6 xl:grid-cols-[340px_1fr]">
+          <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
             <Panel title="Add Vendor" subtitle="Register a new supplier">
               <form onSubmit={addVendor} className="grid gap-4">
                 {[
@@ -455,8 +455,10 @@ export default function PharmacyQueuePage() {
                       onChange={e => setVendorForm(p => ({ ...p, [f.key]: e.target.value }))} />
                   </div>
                 ))}
-                <button disabled={vendorLoading}
-                  className="flex items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--brand)] h-10 font-medium text-white transition-colors hover:brightness-95 disabled:opacity-60">
+                <button
+                  type="submit"
+                  disabled={vendorLoading}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--brand)] h-11 font-bold text-white transition-colors hover:brightness-95 disabled:opacity-60">
                   {vendorLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                   {vendorLoading ? "Adding…" : "Add Vendor"}
                 </button>
@@ -549,10 +551,12 @@ export default function PharmacyQueuePage() {
                     onChange={e => setAddForm(f => ({ ...f, description: e.target.value }))}
                     placeholder="Short description…" />
                 </div>
-                <button disabled={addLoading}
-                  className="flex items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--brand)] h-10 font-medium text-white transition-colors hover:brightness-95 disabled:opacity-60">
+                <button
+                  type="submit"
+                  disabled={addLoading}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--brand)] h-11 font-bold text-white transition-colors hover:brightness-95 disabled:opacity-60">
                   {addLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                  {addLoading ? "Adding…" : "Add Medicine"}
+                  {addLoading ? "Adding…" : "Add Medicine to Catalogue"}
                 </button>
               </form>
             </Panel>

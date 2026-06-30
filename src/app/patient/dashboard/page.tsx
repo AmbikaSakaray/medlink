@@ -26,7 +26,7 @@ type Invoice = { id: string; invoice_code: string; consultation_charge: number; 
 type InsuranceClaim = { id: string; amount: number; status: string; decision_reason: string | null; settled_amount: number | null; created_at: string; policy_id: string | null };
 type Notification = { id: string; title: string; body: string; is_read: boolean; created_at: string };
 type TeleSession = { id: string; scheduled_at: string; status: string; recording_url: string | null; doctor_id: string | null };
-type Tab = "overview" | "profile" | "appointments" | "prescriptions" | "lab" | "insurance" | "billing" | "video" | "notifications";
+type Tab = "overview" | "profile" | "appointments" | "prescriptions" | "lab" | "insurance" | "billing" | "video" | "notifications" | "history";
 
 function StatCard({ label, value, icon, color, bg }: { label: string; value: string | number; icon: React.ReactNode; color: string; bg: string }) {
   return (
@@ -73,7 +73,7 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-const VALID_TABS: Tab[] = ["overview","profile","appointments","prescriptions","lab","insurance","billing","video","notifications"];
+const VALID_TABS: Tab[] = ["overview","profile","appointments","prescriptions","lab","insurance","billing","video","notifications","history"];
 
 function getTabFromURL(): Tab {
   if (typeof window === "undefined") return "overview";
@@ -355,6 +355,7 @@ export default function PatientDashboardPage() {
     { label:"Insurance",      value:"insurance",      icon:<Shield     className="h-4 w-4"/> },
     { label:"Billing",        value:"billing",        icon:<CreditCard className="h-4 w-4"/>, badge: unpaid    },
     { label:"Video Consult",  value:"video",          icon:<Video      className="h-4 w-4"/> },
+    { label:"My History",     value:"history",        icon:<TrendingUp className="h-4 w-4"/> },
     { label:"Notifications",  value:"notifications",  icon:<Bell       className="h-4 w-4"/>, badge: unread    },
   ];
 
@@ -777,6 +778,100 @@ export default function PatientDashboardPage() {
                 </div>
               ))}
               {sessions.length === 0 && <Empty text="No sessions yet. Request one above."/>}
+            </div>
+          </Panel>
+        </div>
+      )}
+
+      {/* ── MY HISTORY ── */}
+      {activeTab === "history" && (
+        <div className="space-y-6">
+          {/* Doctor visit history */}
+          <Panel title="Doctor Visit History" subtitle={`${appointments.length} total visits`}>
+            <div className="space-y-3">
+              {appointments.length === 0 && <Empty text="No doctor visits recorded yet."/>}
+              {appointments.map(a => {
+                const rx = prescriptions.find(p => p.appointment_id === a.id);
+                return (
+                  <div key={a.id} className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-[var(--shadow)]">
+                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
+                      <div>
+                        <p className="font-black text-[var(--ink)]">{a.department}</p>
+                        <p className="text-xs text-[var(--muted)] font-mono mt-0.5">{a.appointment_code}</p>
+                        <p className="text-xs text-[var(--muted)] mt-0.5">
+                          {a.preferred_date}{a.preferred_time ? ` • ${formatTime(a.preferred_time)}` : ""}
+                        </p>
+                      </div>
+                      <StatusBadge status={a.status}/>
+                    </div>
+                    {a.symptoms && (
+                      <p className="mt-2 rounded-xl bg-[var(--canvas)] px-3 py-2 text-xs text-[var(--ink-2)]">
+                        📃 {a.symptoms}
+                      </p>
+                    )}
+                    {rx && (
+                      <div className="mt-3 border-t border-[var(--line)] pt-3">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-[var(--muted)] mb-2">Medicines Prescribed</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(rx.items ?? []).map(item => (
+                            <span key={item.id} className="rounded-full border border-[var(--accent-soft)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-bold text-[var(--accent)]">
+                              💊 {item.medicine_name} ×{item.quantity}
+                            </span>
+                          ))}
+                          {(rx.items ?? []).length === 0 && (
+                            <span className="text-xs text-[var(--muted)]">No medicines listed</span>
+                          )}
+                        </div>
+                        {rx.prescription_notes && (
+                          <p className="mt-2 text-xs italic text-[var(--muted)]">📋 {rx.prescription_notes}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </Panel>
+
+          {/* Medicine purchase history from prescriptions */}
+          <Panel title="Medicine Purchase History" subtitle={`All dispensed medicines across visits`}>
+            {prescriptions.length === 0 && <Empty text="No prescription history yet."/>}
+            <div className="space-y-3">
+              {prescriptions.filter(rx => (rx.items ?? []).length > 0).map(rx => {
+                const appt = appointments.find(a => a.id === rx.appointment_id);
+                return (
+                  <div key={rx.id} className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-[var(--shadow)]">
+                    <div className="flex items-center justify-between gap-2 border-b border-[var(--line)] pb-3">
+                      <div>
+                        <p className="font-black text-[var(--ink)] text-sm">
+                          {appt?.department ?? "Consultation"} — {new Date(rx.created_at).toLocaleDateString()}
+                        </p>
+                        {rx.prescription_notes && (
+                          <p className="text-xs text-[var(--muted)] mt-0.5">{rx.prescription_notes}</p>
+                        )}
+                      </div>
+                      <StatusBadge status={rx.status}/>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {(rx.items ?? []).map(item => (
+                        <div key={item.id} className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-[var(--canvas)] px-4 py-2.5">
+                          <div>
+                            <p className="font-black text-[var(--ink)] text-sm">{item.medicine_name}</p>
+                            <p className="text-xs text-[var(--muted)]">{item.instructions ?? "As directed"}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-black text-[var(--accent)] text-sm">{item.dosage}</p>
+                            <p className="text-xs text-[var(--muted)]">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {prescriptions.filter(rx => (rx.items ?? []).length > 0).length === 0 && prescriptions.length > 0 && (
+                <p className="rounded-2xl bg-[var(--canvas)] p-6 text-center text-sm text-[var(--muted)]">Prescriptions found but no medicines listed yet.</p>
+              )}
             </div>
           </Panel>
         </div>

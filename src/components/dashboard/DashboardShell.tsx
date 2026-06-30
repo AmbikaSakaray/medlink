@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Bell, LogOut, Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export type TabItem = { label: string; value: string; icon: ReactNode; badge?: number; };
 export type LiveSummaryItem = { label: string; value: string | number; };
@@ -43,6 +44,8 @@ export function DashboardShell({
   const [userRole, setUserRole]       = useState("");
   const [mobileOpen, setMobileOpen]   = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
@@ -65,18 +68,17 @@ export function DashboardShell({
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    // Redirect to the login page for the current portal
     const path = window.location.pathname;
-    if (path.startsWith("/patient"))      window.location.href = "/patient/login";
-    else if (path.startsWith("/emergency"))    window.location.href = "/emergency/login";
-    else if (path.startsWith("/doctor"))       window.location.href = "/doctor/login";
-    else if (path.startsWith("/lab"))          window.location.href = "/lab/login";
-    else if (path.startsWith("/pharmacy"))     window.location.href = "/pharmacy/login";
-    else if (path.startsWith("/reception"))    window.location.href = "/reception/login";
-    else if (path.startsWith("/billing"))      window.location.href = "/billing/login";
-    else if (path.startsWith("/insurance"))    window.location.href = "/insurance/login";
-    else if (path.startsWith("/telemedicine")) window.location.href = "/telemedicine/login";
-    else window.location.href = "/login";
+    if (path.startsWith("/patient"))           router.push("/patient/login");
+    else if (path.startsWith("/emergency"))    router.push("/emergency/login");
+    else if (path.startsWith("/doctor"))       router.push("/doctor/login");
+    else if (path.startsWith("/lab"))          router.push("/lab/login");
+    else if (path.startsWith("/pharmacy"))     router.push("/pharmacy/login");
+    else if (path.startsWith("/reception"))    router.push("/reception/login");
+    else if (path.startsWith("/billing"))      router.push("/billing/login");
+    else if (path.startsWith("/insurance"))    router.push("/insurance/login");
+    else if (path.startsWith("/telemedicine")) router.push("/telemedicine/login");
+    else router.push("/login");
   }
 
   const sidebar = (

@@ -169,27 +169,35 @@ export default function InsuranceDashboardPage() {
         {activeTab === "claims" && (
           <Panel title="Claims Queue" subtitle={`${claims.length} total`}>
             <div className="grid gap-4">
-              {claims.map(claim => (
-                <div key={claim.id}
-                  className={`rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow)] transition-colors duration-300 ${flashId === claim.id ? "bg-teal-50" : ""}`}>
-                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                    <div>
-                      <h3 className="text-xl font-black text-slate-950">{claim.patient_name ?? "—"}</h3>
-                      <p className="text-sm font-bold text-slate-500">
-                        Policy: {claim.policy_no ?? "—"} • Amount: ₹{claim.amount.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-slate-400">{new Date(claim.created_at).toLocaleDateString()}</p>
+              {claims.map(claim => {
+                const matchedPolicy = policies.find(p => p.id === claim.policy_id);
+                const patientName = claim.patient_name || matchedPolicy?.patient_name || "—";
+                const policyNo    = claim.policy_no    || matchedPolicy?.policy_no    || "—";
+                const provider    = matchedPolicy?.provider ?? null;
+                return (
+                  <div key={claim.id}
+                    className={`rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow)] transition-colors duration-300 ${flashId === claim.id ? "bg-teal-50" : ""}`}>
+                    <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                      <div>
+                        <h3 className="text-xl font-black text-slate-950">{patientName}</h3>
+                        <p className="text-sm font-bold text-slate-500">
+                          Policy: <span className="font-black text-teal-700">{policyNo}</span>
+                          {provider && <span className="ml-2 text-slate-400">• {provider}</span>}
+                          <span className="ml-2">• Amount: ₹{claim.amount.toLocaleString()}</span>
+                        </p>
+                        <p className="text-xs text-slate-400">{new Date(claim.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <StatusBadge status={claim.status} />
                     </div>
-                    <StatusBadge status={claim.status} />
+                    {claim.decision_reason && (
+                      <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">{claim.decision_reason}</p>
+                    )}
+                    {claim.settled_amount != null && (
+                      <p className="mt-2 text-sm font-black text-emerald-700">Settled: ₹{claim.settled_amount.toLocaleString()}</p>
+                    )}
                   </div>
-                  {claim.decision_reason && (
-                    <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">{claim.decision_reason}</p>
-                  )}
-                  {claim.settled_amount != null && (
-                    <p className="mt-2 text-sm font-black text-emerald-700">Settled: ₹{claim.settled_amount.toLocaleString()}</p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
               {claims.length === 0 && <Empty text="No claims found." />}
             </div>
           </Panel>
@@ -208,14 +216,17 @@ export default function InsuranceDashboardPage() {
                   .filter(c => c.status === "pending" || c.status === "PENDING")
                   .map(claim => {
                     const d = decisionFor(claim.id);
+                    const matchedPolicy = policies.find(p => p.id === claim.policy_id);
+                    const patientName = claim.patient_name || matchedPolicy?.patient_name || "—";
+                    const policyNo    = claim.policy_no    || matchedPolicy?.policy_no    || "—";
                     return (
                       <div key={claim.id}
                         className={`rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow)] transition-colors duration-300 ${flashId === claim.id ? "bg-teal-50" : ""}`}>
                         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                           <div>
-                            <h3 className="text-xl font-black text-slate-950">{claim.patient_name ?? "—"}</h3>
+                            <h3 className="text-xl font-black text-slate-950">{patientName}</h3>
                             <p className="text-sm font-bold text-slate-500">
-                              ₹{claim.amount.toLocaleString()} • {claim.policy_no ?? "—"}
+                              ₹{claim.amount.toLocaleString()} • Policy: <span className="font-black text-teal-700">{policyNo}</span>
                             </p>
                           </div>
                           <StatusBadge status="PENDING" />

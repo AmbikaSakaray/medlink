@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, Suspense } from "react";
-import { Loader2, ArrowLeft, Mail, CheckCircle } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 function ECGLine({ className = "" }: { className?: string }) {
@@ -120,17 +120,15 @@ function ForgotPasswordInner() {
               <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">
                 Email Address
               </label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)]" />
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  className={`input-field pl-11 ${error ? "border-red-400" : ""}`}
-                  value={email}
-                  onChange={e => { setEmail(e.target.value); setError(""); }}
-                  autoFocus
-                />
-              </div>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                className={`input-field ${error ? "border-red-400" : ""}`}
+                value={email}
+                onChange={e => { setEmail(e.target.value); setError(""); }}
+                autoFocus
+                autoComplete="email"
+              />
               {error && (
                 <p className="mt-1.5 text-xs font-semibold text-red-500">{error}</p>
               )}
