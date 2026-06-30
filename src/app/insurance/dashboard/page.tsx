@@ -234,10 +234,14 @@ export default function InsuranceDashboardPage() {
                             <label className="text-xs font-black uppercase tracking-widest text-slate-500">Settlement Amount (₹)</label>
                             <input
                               type="number"
+                              min="0"
                               className="mt-1 w-full rounded-2xl border border-slate-300 p-3 text-sm outline-none focus:border-teal-500"
                               placeholder="Leave blank when rejecting"
                               value={d.settled_amount}
-                              onChange={e => setDecision(claim.id, { settled_amount: e.target.value })}
+                              onChange={e => {
+                                const val = e.target.value;
+                                if (val === "" || Number(val) >= 0) setDecision(claim.id, { settled_amount: val });
+                              }}
                             />
                           </div>
                           <div className="flex gap-3">

@@ -70,19 +70,23 @@ export default function PublicNavbar() {
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Desktop CTAs */}
-          <Link
-            href="/patient/login"
-            className="hidden rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:inline-flex"
-          >
-            Login
-          </Link>
-          <Link
-            href="/patient/register"
-            className="hidden rounded-xl px-4 py-2 text-sm font-bold text-primary-foreground sm:inline-flex"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            Register
-          </Link>
+          {pathname !== "/appointment" && (
+            <>
+              <Link
+                href="/patient/login"
+                className="hidden rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:inline-flex"
+              >
+                Login
+              </Link>
+              <Link
+                href="/patient/register"
+                className="hidden rounded-xl px-4 py-2 text-sm font-bold text-primary-foreground sm:inline-flex"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                Register
+              </Link>
+            </>
+          )}
 
           {/* Mobile burger */}
           <button
@@ -116,23 +120,25 @@ export default function PublicNavbar() {
                   {l.label}
                 </Link>
               ))}
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Link
-                  href="/patient/login"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl border border-border py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-primary/10"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/patient/register"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl py-2.5 text-center text-sm font-bold text-primary-foreground"
-                  style={{ background: "var(--gradient-primary)" }}
-                >
-                  Register
-                </Link>
-              </div>
+              {pathname !== "/appointment" && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Link
+                    href="/patient/login"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl border border-border py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-primary/10"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/patient/register"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl py-2.5 text-center text-sm font-bold text-primary-foreground"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

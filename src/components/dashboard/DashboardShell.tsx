@@ -32,10 +32,11 @@ function Logo() {
 }
 
 export function DashboardShell({
-  portalName, portalSubtitle, tabs, activeTab, onTabChange, liveSummary, headerExtra, children,
+  portalName, portalSubtitle, tabs, activeTab, onTabChange, liveSummary, headerExtra, children, onBellClick,
 }: {
   portalName: string; portalSubtitle: string; tabs: TabItem[]; activeTab: string;
   onTabChange: (tab: string) => void; liveSummary?: LiveSummaryItem[]; headerExtra?: ReactNode; children: ReactNode;
+  onBellClick?: () => void;
 }) {
   const [userName, setUserName]       = useState("...");
   const [userInitials, setUserInitials] = useState("--");
@@ -178,7 +179,9 @@ export function DashboardShell({
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--line)] text-[var(--ink-2)] hover:bg-[var(--canvas)] transition">
+            <button
+              onClick={onBellClick}
+              className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--line)] text-[var(--ink-2)] hover:bg-[var(--canvas)] transition">
               <Bell className="h-4 w-4"/>
             </button>
             <div className="h-5 w-px bg-[var(--line)] mx-1"/>

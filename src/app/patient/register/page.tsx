@@ -145,24 +145,24 @@ function PatientRegisterInner() {
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Full Name</label>
+              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Full Name <span className="text-red-500">*</span></label>
               <input type="text" placeholder="Dr. / Mr. / Ms. Full Name" className={`input-field ${fieldErrors.full_name ? "border-red-400" : ""}`} value={form.full_name} onChange={set("full_name")}/>
               {fieldErrors.full_name && <p className="mt-1 text-xs font-semibold text-red-500">{fieldErrors.full_name}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Phone</label>
+                <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Phone <span className="text-red-500">*</span></label>
                 <input type="text" placeholder="01XXXXXXXXX or +8801XXXXXXXXX" className={`input-field ${fieldErrors.phone ? "border-red-400" : ""}`} value={form.phone} onChange={set("phone")}/>
                 {fieldErrors.phone ? <p className="mt-1 text-xs font-semibold text-red-500">{fieldErrors.phone}</p> : <p className="mt-1 text-[10px] text-[var(--ink-2)] opacity-70">Prefix: 013–019 (GP, Robi, BL, Teletalk)</p>}
               </div>
               <div>
-                <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Age</label>
-                <input type="number" min={1} placeholder="25" className={`input-field ${fieldErrors.age ? "border-red-400" : ""}`} value={form.age} onChange={set("age")}/>
+                <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Age <span className="text-red-500">*</span></label>
+                <input type="number" min={1} placeholder="Eg: 25" className={`input-field ${fieldErrors.age ? "border-red-400" : ""}`} value={form.age} onChange={set("age")}/>
                 {fieldErrors.age && <p className="mt-1 text-xs font-semibold text-red-500">{fieldErrors.age}</p>}
               </div>
             </div>
             <div>
-              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Gender</label>
+              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Gender <span className="text-red-500">*</span></label>
               <select className={`input-field ${fieldErrors.gender ? "border-red-400" : ""}`} value={form.gender} onChange={set("gender")}>
                 <option value="">Select Gender</option>
                 <option value="MALE">Male</option>
@@ -172,7 +172,7 @@ function PatientRegisterInner() {
               {fieldErrors.gender && <p className="mt-1 text-xs font-semibold text-red-500">{fieldErrors.gender}</p>}
             </div>
             <div>
-              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Email Address</label>
+              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Email Address <span className="text-red-500">*</span></label>
               <input type="email" placeholder="you@example.com" className={`input-field ${fieldErrors.email ? "border-red-400" : ""}`} value={form.email} onChange={set("email")}/>
               {fieldErrors.email && <p className="mt-1 text-xs font-semibold text-red-500">{fieldErrors.email}</p>}
             </div>
@@ -181,7 +181,7 @@ function PatientRegisterInner() {
               <input type="text" placeholder="House No, Street, City" className="input-field" value={form.address} onChange={set("address")}/>
             </div>
             <div>
-              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Password</label>
+              <label className="block mb-1.5 text-xs font-black uppercase tracking-widest text-[var(--ink-2)]">Password <span className="text-red-500">*</span></label>
               <div className="relative">
                 <input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" className={`input-field pr-11 ${fieldErrors.password ? "border-red-400" : ""}`} value={form.password} onChange={set("password")}/>
                 <button type="button" onClick={() => setShowPw(v => !v)}

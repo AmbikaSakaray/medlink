@@ -377,6 +377,7 @@ export default function PatientDashboardPage() {
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={t => navigateTab(t as Tab)}
+      onBellClick={() => navigateTab("notifications")}
       liveSummary={[
         { label:"Patient Code",  value: patient?.patient_code ?? "—" },
         { label:"Appointments",  value: appointments.length },
@@ -644,8 +645,11 @@ export default function PatientDashboardPage() {
             <form onSubmit={submitClaim} className="space-y-4">
               <div>
                 <label className="block text-xs font-black uppercase tracking-widest text-[var(--ink-2)] mb-1.5">Amount (৳)</label>
-                <input required type="number" placeholder="e.g. 5000" className="input-field"
-                  value={claimForm.amount} onChange={e => setClaimForm({ ...claimForm, amount: e.target.value })}/>
+                <input required type="number" min="1" placeholder="e.g. 5000" className="input-field"
+                  value={claimForm.amount} onChange={e => {
+                    const val = e.target.value;
+                    if (val === "" || Number(val) > 0) setClaimForm({ ...claimForm, amount: val });
+                  }}/>
               </div>
               <div>
                 <label className="block text-xs font-black uppercase tracking-widest text-[var(--ink-2)] mb-1.5">Description</label>
