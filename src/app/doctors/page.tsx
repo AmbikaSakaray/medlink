@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, X, Calendar, Clock, Pill } from "lucide-react";
 import PublicNavbar from "@/components/public/PublicNavbar";
 import PublicFooter from "@/components/public/PublicFooter";
-import { SectionHeading } from "@/components/public/SectionHeading";
 import { GradientBlobs } from "@/components/public/GradientBlobs";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,6 +16,33 @@ type Doctor = {
   experience_years: number;
   consultation_fee: number;
   is_available: boolean;
+};
+
+type Appointment = {
+  id: string;
+  appointment_code: string;
+  department: string;
+  preferred_date: string;
+  preferred_time: string | null;
+  symptoms: string | null;
+  status: string;
+};
+
+type PrescriptionItem = {
+  id: string;
+  medicine_name: string;
+  dosage: string | null;
+  quantity: number;
+  instructions: string | null;
+};
+
+type Prescription = {
+  id: string;
+  appointment_id: string | null;
+  prescription_notes: string | null;
+  status: string;
+  created_at: string;
+  items?: PrescriptionItem[];
 };
 
 const specColors: Record<string, string> = {
@@ -33,10 +59,257 @@ function getColor(dept: string) {
   return "#3b82f6";
 }
 
+function statusColor(status: string) {
+  const s = status.toUpperCase();
+  if (s === "APPROVED" || s === "COMPLETED") return "bg-emerald-100 text-emerald-700";
+  if (s === "PENDING") return "bg-amber-100 text-amber-700";
+  if (s === "CANCELLED") return "bg-red-100 text-red-600";
+  return "bg-slate-100 text-slate-600";
+}
+
+function formatTime(t: string | null) {
+  if (!t) return "Any time";
+  const [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+
+/* ── History Modal ── */
+function HistoryModal({ onClose }: { onClose: () => void }) {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [notLoggedIn, setNotLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // block body scroll while modal is open
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) { setNotLoggedIn(true); setLoadingHistory(false); return; }
+
+      const { data: patient } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("profile_id", auth.user.id)
+        .maybeSingle();
+
+      if (!patient) { setNotLoggedIn(true); setLoadingHistory(false); return; }
+
+      const [apptRes, rxRes] = await Promise.all([
+        supabase
+          .from("appointments")
+          .select("id,appointment_code,department,preferred_date,preferred_time,symptoms,status")
+          .eq("patient_id", patient.id)
+          .order("preferred_date", { ascending: false }),
+        supabase
+          .from("prescriptions")
+          .select("id,appointment_id,prescription_notes,status,created_at")
+          .eq("patient_id", patient.id)
+          .order("created_at", { ascending: false }),
+      ]);
+
+      const appts = apptRes.data ?? [];
+      const rxRows = rxRes.data ?? [];
+
+      if (rxRows.length > 0) {
+        const { data: items } = await supabase
+          .from("prescription_items")
+          .select("*")
+          .in("prescription_id", rxRows.map(r => r.id));
+        setPrescriptions(
+          rxRows.map(rx => ({
+            ...rx,
+            items: (items ?? []).filter(i => i.prescription_id === rx.id),
+          }))
+        );
+      }
+
+      setAppointments(appts);
+      setLoadingHistory(false);
+    }
+    fetchHistory();
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl bg-white shadow-2xl overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 shrink-0">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">My Visit History</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Past appointments & prescribed medicines</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Body — scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+
+          {loadingHistory && (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm font-semibold text-slate-500">Loading your history…</p>
+            </div>
+          )}
+
+          {!loadingHistory && notLoggedIn && (
+            <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
+              <div className="text-5xl">🔒</div>
+              <p className="font-black text-slate-800 text-base">Sign in to view your history</p>
+              <p className="text-sm text-slate-500 max-w-xs">
+                Please log in to your patient account to see past appointments and prescriptions.
+              </p>
+              <div className="flex gap-3 mt-2">
+                <Link
+                  href="/patient/login"
+                  onClick={onClose}
+                  className="rounded-2xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                  style={{ background: "var(--gradient-primary)" }}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/patient/register"
+                  onClick={onClose}
+                  className="rounded-2xl border border-border px-5 py-2.5 text-sm font-bold text-foreground transition hover:bg-slate-50"
+                >
+                  Register
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {!loadingHistory && !notLoggedIn && appointments.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+              <div className="text-5xl">📋</div>
+              <p className="font-black text-slate-800">No visit history yet</p>
+              <p className="text-sm text-slate-500">Your appointments will appear here after booking.</p>
+              <Link
+                href="/appointment"
+                onClick={onClose}
+                className="mt-2 rounded-2xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                Book an Appointment
+              </Link>
+            </div>
+          )}
+
+          {!loadingHistory && !notLoggedIn && appointments.map(appt => {
+            const rx = prescriptions.find(p => p.appointment_id === appt.id);
+            const color = getColor(appt.department);
+            return (
+              <div
+                key={appt.id}
+                className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+              >
+                {/* Appointment header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white text-xs font-black"
+                      style={{ background: `linear-gradient(135deg,${color},${color}99)` }}
+                    >
+                      🏥
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-900 text-sm">{appt.department}</p>
+                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">{appt.appointment_code}</p>
+                    </div>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${statusColor(appt.status)}`}>
+                    {appt.status}
+                  </span>
+                </div>
+
+                {/* Date + Time */}
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <span className="flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                    {appt.preferred_date}
+                  </span>
+                  <span className="flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                    {formatTime(appt.preferred_time)}
+                  </span>
+                </div>
+
+                {appt.symptoms && (
+                  <p className="mt-2.5 rounded-xl bg-white border border-slate-100 px-3 py-2 text-xs text-slate-600">
+                    📋 {appt.symptoms}
+                  </p>
+                )}
+
+                {/* Medicines from prescription */}
+                {rx && (rx.items ?? []).length > 0 && (
+                  <div className="mt-3 border-t border-slate-200 pt-3">
+                    <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                      <Pill className="h-3 w-3" /> Medicines Prescribed
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(rx.items ?? []).map(item => (
+                        <span
+                          key={item.id}
+                          className="rounded-full bg-white border border-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700"
+                        >
+                          {item.medicine_name}
+                          {item.dosage ? ` · ${item.dosage}` : ""}
+                          {` ×${item.quantity}`}
+                        </span>
+                      ))}
+                    </div>
+                    {rx.prescription_notes && (
+                      <p className="mt-2 text-xs italic text-slate-400">📝 {rx.prescription_notes}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        {!loadingHistory && !notLoggedIn && appointments.length > 0 && (
+          <div className="shrink-0 border-t border-slate-100 px-6 py-3 flex items-center justify-between bg-white">
+            <p className="text-xs text-slate-400">{appointments.length} visit{appointments.length !== 1 ? "s" : ""} total</p>
+            <Link
+              href="/patient/dashboard?tab=history"
+              onClick={onClose}
+              className="rounded-xl px-4 py-2 text-xs font-black text-white transition hover:opacity-90"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              Full Dashboard →
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Page ── */
 export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     async function fetchDoctors() {
@@ -87,6 +360,9 @@ export default function DoctorsPage() {
   return (
     <>
       <PublicNavbar />
+
+      {/* History modal — rendered in-place, no navigation */}
+      {showHistory && <HistoryModal onClose={() => setShowHistory(false)} />}
 
       {/* Hero */}
       <section className="relative overflow-hidden py-12 sm:py-28">
@@ -206,7 +482,8 @@ export default function DoctorsPage() {
                             <span>⭐</span>{doc.experience_years}+ Years Experience
                           </p>
                         </div>
-                        <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4">
+
+                        <div className="mt-5 flex flex-col gap-2.5 border-t border-border pt-4">
                           <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Consultation Fee</p>
@@ -220,12 +497,13 @@ export default function DoctorsPage() {
                               Book Visit
                             </Link>
                           </div>
-                          <Link
-                            href={`/patient/dashboard?tab=appointments`}
-                            className="w-full rounded-2xl border border-border px-4 py-2.5 text-center text-sm font-bold text-foreground/80 transition hover:bg-primary/10 hover:text-primary"
+                          {/* View History — opens modal IN PLACE, no navigation */}
+                          <button
+                            onClick={() => setShowHistory(true)}
+                            className="w-full rounded-2xl border border-border bg-white px-4 py-2.5 text-center text-sm font-bold text-foreground/80 transition hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                           >
                             View History
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     </div>
