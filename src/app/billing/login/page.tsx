@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Loader2, ArrowLeft, CreditCard, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { validateLoginForm } from "@/lib/validate";
+import { useRouter } from "next/navigation";
 
 export default function BillingLoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +34,7 @@ export default function BillingLoginPage() {
       setLoading(false);
       return;
     }
-    window.location.href = "/billing/dashboard";
+    router.push("/billing/dashboard");
   }
 
   return (

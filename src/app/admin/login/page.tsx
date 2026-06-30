@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Loader2, ArrowLeft, Users, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { validateLoginForm } from "@/lib/validate";
+import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +33,7 @@ export default function AdminLoginPage() {
       setError(!profile?.is_active ? "Account inactive. Contact Super Admin." : `Access denied. Your role is: ${profile?.role ?? "unknown"}. Hospital Admin access required.`);
       setLoading(false); return;
     }
-    window.location.href = "/admin/dashboard";
+    router.push("/admin/dashboard");
   }
 
   return (

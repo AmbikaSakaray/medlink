@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Loader2, ArrowLeft, ClipboardList, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { validateLoginForm } from "@/lib/validate";
+import { useRouter } from "next/navigation";
 
 export default function ReceptionLoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +33,7 @@ export default function ReceptionLoginPage() {
       setError(!profile?.is_active ? "Account inactive." : `Access denied. Your role is: ${profile?.role ?? "unknown"}.`);
       setLoading(false); return;
     }
-    window.location.href = "/reception/dashboard";
+    router.push("/reception/dashboard");
   }
 
   return (

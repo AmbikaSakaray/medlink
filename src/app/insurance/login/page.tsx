@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Loader2, ArrowLeft, Shield, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { validateLoginForm } from "@/lib/validate";
+import { useRouter } from "next/navigation";
 
 export default function InsuranceLoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +34,7 @@ export default function InsuranceLoginPage() {
       setLoading(false);
       return;
     }
-    window.location.href = "/insurance/dashboard";
+    router.push("/insurance/dashboard");
   }
 
   return (
