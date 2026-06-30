@@ -1,15 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { apiFetch } from "@/lib/apiFetch";
-import { DashboardShell, type TabItem } from "@/components/dashboard/DashboardShell";
-import { Panel } from "@/components/dashboard/Panel";
-import { Info } from "@/components/dashboard/Info";
-import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { MetricCard } from "@/components/dashboard/MetricCard";
-import { SuccessBanner } from "@/components/dashboard/SuccessBanner";
-import { Stethoscope, Clock, CheckCircle2, Users, Loader2, AlertCircle, FileText } from "lucide-react";
 
 type LabReport = {
   id: string;
@@ -103,8 +96,9 @@ export default function DoctorQueuePage() {
 
   useEffect(() => {
     const supabase = createClient();
+    const { useRouter } = require("next/navigation");
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) { window.location.href = "/doctor/login"; return; }
+      if (!data.user) { window.location.replace("/doctor/login"); return; }
       loadQueue();
     });
   }, []);
