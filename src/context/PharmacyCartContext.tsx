@@ -96,7 +96,7 @@ export function PharmacyCartProvider({ children }: { children: ReactNode }) {
       return [...prev, { ...item, qty: 1 }];
     });
 
-    setCartOpen(true);
+    
   }
 
   function updateQty(id: string, qty: number) {

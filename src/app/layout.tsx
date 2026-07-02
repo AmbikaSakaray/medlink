@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+
 import { StethoscopeBackground } from "@/components/public/StethoscopeBackground";
 import { PharmacyCartProvider } from "@/context/PharmacyCartContext";
 import CartDrawer from "@/components/pharmacy/CartDrawer";
+
 import "./globals.css";
 
 const inter = Inter({
@@ -23,10 +25,14 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Medilink Health Care — Healthcare, Reimagined",
   description:
-    "Premium digital healthcare platform connecting patients, doctors, labs and pharmacy.",
+    "Premium digital healthcare platform connecting patients, doctors, laboratories and pharmacies.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
@@ -37,12 +43,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem={false}
           forcedTheme="light"
+          enableSystem={false}
         >
           <PharmacyCartProvider>
             <StethoscopeBackground />
+
             {children}
+
+            {/* Global Pharmacy Cart */}
             <CartDrawer />
           </PharmacyCartProvider>
         </ThemeProvider>

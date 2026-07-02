@@ -18,9 +18,17 @@ export default function PublicNavbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  function openCart() {
+    setOpen(false);
+    setCartOpen(true);
+  }
 
   return (
     <motion.header
@@ -81,11 +89,12 @@ export default function PublicNavbar() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setCartOpen(true)}
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground transition hover:bg-primary/10 hover:text-primary"
+            onClick={openCart}
             aria-label="Open pharmacy cart"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground transition hover:bg-primary/10 hover:text-primary"
           >
             <ShoppingCart size={19} />
+
             {cartCount > 0 && (
               <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                 {cartCount}
@@ -144,7 +153,12 @@ export default function PublicNavbar() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-primary/10 hover:text-primary"
+                  className={[
+                    "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    pathname === l.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground/80 hover:bg-primary/10 hover:text-primary",
+                  ].join(" ")}
                 >
                   {l.label}
                 </Link>
@@ -152,15 +166,36 @@ export default function PublicNavbar() {
 
               <button
                 type="button"
-                onClick={() => {
-                  setOpen(false);
-                  setCartOpen(true);
-                }}
+                onClick={openCart}
                 className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-bold text-foreground transition hover:bg-primary/10 hover:text-primary"
               >
                 <ShoppingCart size={17} />
                 Cart {cartCount > 0 ? `(${cartCount})` : ""}
               </button>
+
+              {pathname !== "/appointment" && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Link
+                    href="/patient/login"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl border border-border py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-primary/10"
+                  >
+                    Login
+                  </Link>
+
+                  <Link
+                    href="/patient/register"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:opacity-90"
+                    style={{
+                      background: "var(--gradient-primary)",
+                      boxShadow: "var(--shadow-glow)",
+                    }}
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

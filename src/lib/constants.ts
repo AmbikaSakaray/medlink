@@ -19,6 +19,7 @@ export const publicNavLinks = [
   { label: "Departments", href: "/departments"  },
   { label: "Doctors",     href: "/doctors"      },
   { label: "Pharmacy",    href: "/pharmacy"     },
+  
   { label: "Contact",     href: "/contact"      },
 ];
 
