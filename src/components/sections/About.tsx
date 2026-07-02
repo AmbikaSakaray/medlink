@@ -1,16 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "motion/react";
-import { CheckCircle2, Quote } from "lucide-react";
+import { CheckCircle2, Quote, ShieldCheck, Users, Building2 } from "lucide-react";
 import { Tilt3D } from "@/components/public/Tilt3D";
 import { SectionHeading } from "@/components/public/SectionHeading";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 
 const highlights = [
-  "Single connected healthcare ecosystem",
-  "Patients, doctors, hospitals & pharmacies united",
-  "Accessible and efficient digital care",
+  "Patient-first digital healthcare experience",
+  "Doctors, hospitals, diagnostics, and pharmacy connected",
+  "Transparent booking, consultation, and care support",
+];
+
+const trustCards = [
+  { Icon: ShieldCheck, label: "Trust-focused care" },
+  { Icon: Users, label: "Patient-oriented workflow" },
+  { Icon: Building2, label: "Dhaka-based healthcare network" },
 ];
 
 export function About() {
@@ -19,7 +26,8 @@ export function About() {
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           eyebrow="About Us"
-          title="An Advanced Healthcare Technology Platform"
+          title="Medilink Health Care"
+          description="A connected digital healthcare platform built to make patient care simpler, faster, and more reliable."
         />
 
         <motion.div
@@ -29,59 +37,96 @@ export function About() {
           viewport={viewportOnce}
           className="mt-12 grid items-center gap-10 lg:grid-cols-2"
         >
-          {/* Left: image + director card */}
           <motion.div variants={fadeUp}>
             <Tilt3D intensity={8}>
               <div className="relative rounded-3xl glass-card p-3">
-                {/* Dr. Arif Mahmud — founder portrait */}
                 <Image
                   src="/director.jpg"
-                  alt="Dr. Arif Mahmud — Founder & Managing Director"
+                  alt="Dr. Arif Mahmud, Founder and Managing Director of Medilink Health Care"
                   width={900}
                   height={900}
-                  className="w-full rounded-2xl object-cover object-top"
-                  style={{ maxHeight: "420px" }}
+                  className="h-[420px] w-full rounded-2xl object-cover object-top"
+                  priority
                 />
-                {/* Name card overlay — bottom of portrait */}
-                <div className="absolute bottom-6 left-6 right-6 flex items-center gap-3 rounded-2xl px-5 py-4"
+
+                <div
+                  className="absolute bottom-6 left-6 right-6 flex items-center gap-3 rounded-2xl px-5 py-4"
                   style={{
-                    background: "oklch(0.93 0.03 210 / 0.97)",
+                    background: "oklch(0.98 0.012 215 / 0.96)",
                     backdropFilter: "blur(20px)",
-                    border: "1.5px solid oklch(0.55 0.12 215 / 0.40)",
-                    boxShadow: "0 8px 32px oklch(0.3 0.12 230 / 0.22)",
+                    border: "1px solid var(--glass-border)",
+                    boxShadow: "var(--shadow-soft)",
                   }}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground"
-                    style={{ background: "var(--gradient-primary)" }}>
-                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    <Users size={20} />
                   </div>
+
                   <div>
-                    <p className="font-display text-sm font-extrabold leading-tight" style={{ color: "oklch(0.15 0.07 248)" }}>Dr. Arif Mahmud</p>
-                    <p className="text-xs font-semibold" style={{ color: "oklch(0.40 0.10 215)" }}>Founder & Managing Director</p>
+                    <p className="font-display text-sm font-extrabold leading-tight text-foreground">
+                      Dr. Arif Mahmud
+                    </p>
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      Founder & Managing Director
+                    </p>
                   </div>
                 </div>
               </div>
             </Tilt3D>
           </motion.div>
 
-          {/* Right: text — vertically centered with image */}
-          <motion.div variants={fadeUp} className="flex flex-col justify-center pt-4">
+          <motion.div variants={fadeUp} className="flex flex-col justify-center">
             <Quote className="text-primary/40" size={40} />
+
             <p className="mt-4 text-lg leading-relaxed text-foreground/90">
-              Medilink Health Care is an advanced healthcare technology platform that seamlessly
-              connects patients, doctors, hospitals, diagnostic centers, and pharmacies within a
-              single digital ecosystem, promoting accessible and efficient healthcare services.
+              Medilink Health Care connects patients with doctors, hospitals,
+              diagnostic centres, and pharmacies through one professional
+              healthcare ecosystem. Our goal is to reduce confusion, improve
+              access, and support patients at every step of their care journey.
             </p>
+
             <ul className="mt-8 space-y-3">
               {highlights.map((h) => (
                 <li key={h} className="flex items-center gap-3">
                   <CheckCircle2 className="shrink-0 text-mint" size={22} />
-                  <span className="font-medium">{h}</span>
+                  <span className="font-medium text-foreground">{h}</span>
                 </li>
               ))}
             </ul>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {trustCards.map(({ Icon, label }) => (
+                <div key={label} className="rounded-2xl glass-card p-4">
+                  <Icon className="text-primary" size={22} />
+                  <p className="mt-2 text-sm font-bold text-foreground">
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/about"
+                className="rounded-2xl px-6 py-3 text-sm font-bold text-primary-foreground transition hover:opacity-90"
+                style={{
+                  background: "var(--gradient-primary)",
+                  boxShadow: "var(--shadow-glow)",
+                }}
+              >
+                Learn More
+              </Link>
+
+              <Link
+                href="/appointment"
+                className="glass rounded-2xl px-6 py-3 text-sm font-semibold text-foreground transition hover:shadow-soft"
+              >
+                Book Appointment
+              </Link>
+            </div>
           </motion.div>
         </motion.div>
       </div>

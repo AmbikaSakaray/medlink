@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { StethoscopeBackground } from "@/components/public/StethoscopeBackground";
+import { PharmacyCartProvider } from "@/context/PharmacyCartContext";
+import CartDrawer from "@/components/pharmacy/CartDrawer";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,7 +23,7 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Medilink Health Care — Healthcare, Reimagined",
   description:
-    "Premium digital healthcare platform connecting patients, doctors, labs and pharmacy. NABH accredited. Book appointments, manage health records, teleconsult.",
+    "Premium digital healthcare platform connecting patients, doctors, labs and pharmacy.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -31,10 +33,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${inter.variable} ${poppins.variable}`}
     >
-      <body className="font-sans antialiased min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
-          <StethoscopeBackground />
-          {children}
+      <body className="min-h-screen font-sans antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          forcedTheme="light"
+        >
+          <PharmacyCartProvider>
+            <StethoscopeBackground />
+            {children}
+            <CartDrawer />
+          </PharmacyCartProvider>
         </ThemeProvider>
       </body>
     </html>

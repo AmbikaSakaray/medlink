@@ -312,7 +312,10 @@ export default function PharmacyPage() {
   function updateQty(id: string, qty: number) { if (qty < 1) removeFromCart(id); else setCart(p => p.map(i => i.id === id ? { ...i, qty } : i)); }
   function removeFromCart(id: string) { setCart(p => p.filter(i => i.id !== id)); }
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-
+  useEffect(() => {
+  localStorage.setItem("pharmacy_cart_count", String(cartCount));
+  window.dispatchEvent(new Event("pharmacy-cart-updated"));
+  }, [cartCount]);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   function handleSearchKey(e: React.KeyboardEvent<HTMLInputElement>) {

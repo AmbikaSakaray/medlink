@@ -15,6 +15,7 @@ export const hospitalInfo = {
 export const publicNavLinks = [
   { label: "Home",        href: "/"            },
   { label: "About Us",    href: "/about"        },
+  { label: "Services",    href: "/services"     },
   { label: "Departments", href: "/departments"  },
   { label: "Doctors",     href: "/doctors"      },
   { label: "Pharmacy",    href: "/pharmacy"     },
