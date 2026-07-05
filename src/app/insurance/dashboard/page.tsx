@@ -12,23 +12,37 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { SuccessBanner } from "@/components/dashboard/SuccessBanner";
 
 type Claim = {
-  id: string; patient_id: string | null; policy_id: string | null; appointment_id: string | null;
-  amount: number; status: string; decision_reason: string | null; settled_amount: number | null;
-  created_at: string; patient_name?: string; policy_no?: string;
+  id: string; 
+  patient_id: string | null; 
+  policy_id: string | null; 
+  appointment_id: string | null;
+  amount: number; 
+  status: string; 
+  decision_reason: string | null; 
+  settled_amount: number | null;
+  created_at: string; 
+  patient_name?: string; 
+  policy_no?: string;
 };
+
 type Policy = {
-  id: string; patient_id: string | null; policy_no: string; provider: string;
-  coverage_amount: number; valid_until: string; patient_name?: string;
+  id: string; 
+  patient_id: string | null; 
+  policy_no: string; 
+  provider: string;
+  coverage_amount: number; 
+  valid_until: string; 
+  patient_name?: string;
 };
 
 type Tab = "claims" | "approvals" | "policies" | "coverage" | "tracking";
 
 const tabs: TabItem[] = [
-  { label: "Claims",    value: "claims",    icon: <ClipboardList className="h-[18px] w-[18px]" /> },
-  { label: "Approvals", value: "approvals", icon: <CheckCircle   className="h-[18px] w-[18px]" /> },
-  { label: "Policies",  value: "policies",  icon: <FileText      className="h-[18px] w-[18px]" /> },
-  { label: "Coverage",  value: "coverage",  icon: <Search        className="h-[18px] w-[18px]" /> },
-  { label: "Tracking",  value: "tracking",  icon: <MapPin        className="h-[18px] w-[18px]" /> },
+  { label: "Claims",     value: "claims",    icon: <ClipboardList className="h-[18px] w-[18px]" /> },
+  { label: "Approvals", value: "approvals",  icon: <CheckCircle   className="h-[18px] w-[18px]" /> },
+  { label: "Policies",  value: "policies",   icon: <FileText      className="h-[18px] w-[18px]" /> },
+  { label: "Coverage",  value: "coverage",   icon: <Search        className="h-[18px] w-[18px]" /> },
+  { label: "Tracking",  value: "tracking",   icon: <MapPin        className="h-[18px] w-[18px]" /> },
 ];
 
 function Empty({ text }: { text: string }) {
@@ -203,9 +217,9 @@ export default function InsuranceDashboardPage() {
           </Panel>
         )}
 
-        {/* ── APPROVALS ── */}
+        {/* ── APPROVALS (FIXED FOR BUG 17) ── */}
         {activeTab === "approvals" && (
-          <Panel title="Approve / Reject Claims" subtitle="Process pending claims">
+          <Panel title="Approve / Reject Claims" subtitle="Process pending claims with complete evaluation visibility">
             <div className="grid gap-5">
               {claims.filter(c => c.status === "pending" || c.status === "PENDING").length === 0 ? (
                 <div className="rounded-2xl bg-emerald-50 p-10 text-center font-bold text-emerald-700">
@@ -219,19 +233,40 @@ export default function InsuranceDashboardPage() {
                     const matchedPolicy = policies.find(p => p.id === claim.policy_id);
                     const patientName = claim.patient_name || matchedPolicy?.patient_name || "—";
                     const policyNo    = claim.policy_no    || matchedPolicy?.policy_no    || "—";
+                    const provider    = matchedPolicy?.provider || "—";
+                    const patientId   = claim.patient_id || matchedPolicy?.patient_id || "N/A";
+                    const appointmentId = claim.appointment_id || "N/A";
+
                     return (
                       <div key={claim.id}
                         className={`rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow)] transition-colors duration-300 ${flashId === claim.id ? "bg-teal-50" : ""}`}>
+                        
+                        {/* Summary Header */}
                         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                           <div>
                             <h3 className="text-xl font-black text-slate-950">{patientName}</h3>
                             <p className="text-sm font-bold text-slate-500">
-                              ₹{claim.amount.toLocaleString()} • Policy: <span className="font-black text-teal-700">{policyNo}</span>
+                              Requested Claim Amount: <span className="text-slate-900 font-extrabold">₹{claim.amount.toLocaleString()}</span>
                             </p>
                           </div>
                           <StatusBadge status="PENDING" />
                         </div>
-                        <div className="mt-4 grid gap-3">
+
+                        {/* Bug 17 Fix: Complete Patient, Policy, and Claim Detail Grid Block */}
+                        <div className="mt-4 grid gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-3 border border-slate-200">
+                          <Info label="Patient Name" value={patientName} />
+                          <Info label="Patient ID" value={patientId} />
+                          <Info label="Policy Number" value={policyNo} />
+                          <Info label="Claim Reference ID" value={claim.id} />
+                          <Info label="Insurance Provider" value={provider} />
+                          <Info label="Appointment Reference ID" value={appointmentId} />
+                          <div className="sm:col-span-2 lg:col-span-3">
+                            <Info label="Submission Date" value={new Date(claim.created_at).toLocaleString()} />
+                          </div>
+                        </div>
+
+                        {/* Action Decision Form Fields */}
+                        <div className="mt-5 grid gap-3">
                           <div>
                             <label className="text-xs font-black uppercase tracking-widest text-slate-500">Decision Reason</label>
                             <input
@@ -255,18 +290,18 @@ export default function InsuranceDashboardPage() {
                               }}
                             />
                           </div>
-                          <div className="flex gap-3">
+                          <div className="flex gap-3 pt-2">
                             <button
                               disabled={busyId === claim.id}
                               onClick={() => approveClaim(claim.id)}
                               className="rounded-2xl bg-emerald-600 px-6 py-3 font-black text-white hover:bg-emerald-500 active:scale-[0.98] disabled:opacity-50">
-                              {busyId === claim.id ? "Saving…" : "Approve"}
+                              {busyId === claim.id ? "Saving…" : "Approve & Settle"}
                             </button>
                             <button
                               disabled={busyId === claim.id}
                               onClick={() => rejectClaim(claim.id)}
                               className="rounded-2xl bg-red-600 px-6 py-3 font-black text-white hover:bg-red-500 active:scale-[0.98] disabled:opacity-50">
-                              {busyId === claim.id ? "Saving…" : "Reject"}
+                              {busyId === claim.id ? "Saving…" : "Reject Claim"}
                             </button>
                           </div>
                         </div>

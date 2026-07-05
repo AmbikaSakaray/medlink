@@ -52,6 +52,23 @@ const tabs: TabItem[] = [
 
 const inputCls = "h-10 w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] px-3 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]";
 
+// Bug 14 & 15 fix: keep the main form actions visible and visually strong.
+const stickyActionBoxCls = "sticky bottom-4 z-20 mt-5 rounded-2xl border border-teal-200 bg-white/95 p-3 shadow-xl backdrop-blur";
+const primaryActionBtnCls = "flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60";
+
+// React render must stay pure. Keep the current-day timestamp outside render
+// and use this helper instead of calling Date.now() inside JSX/render logic.
+const ONE_DAY_MS = 86_400_000;
+const TODAY_START_MS = (() => {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+})();
+
+function getDaysUntil(expiryDate: string | null) {
+  if (!expiryDate) return Number.POSITIVE_INFINITY;
+  return (new Date(expiryDate).getTime() - TODAY_START_MS) / ONE_DAY_MS;
+}
+
 export default function PharmacyQueuePage() {
   const [activeTab,     setActiveTab]     = useState<Tab>("queue");
   const [message,       setMessage]       = useState("");
@@ -73,8 +90,8 @@ export default function PharmacyQueuePage() {
   });
   const [addLoading, setAddLoading] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     const [rxRes, invRes, ordRes, venRes] = await Promise.all([
       apiFetch("/api/pharmacy/queue").then(r => r.json()).catch(() => ({})),
       apiFetch("/api/pharmacy/inventory").then(r => r.json()).catch(() => ({})),
@@ -88,7 +105,13 @@ export default function PharmacyQueuePage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void load();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
   async function dispense(id: string) {
     setActionId(id);
@@ -162,7 +185,7 @@ export default function PharmacyQueuePage() {
   const lowStock      = medicines.filter(m => m.quantity <= (m.reorder_level ?? 0)).length;
   const nearExpiry    = medicines.filter(m => {
     if (!m.expiry_date) return false;
-    const days = (new Date(m.expiry_date).getTime() - Date.now()) / 86400000;
+    const days = getDaysUntil(m.expiry_date);
     return days <= 90 && days > 0;
   }).length;
   const pendingOrders = orders.filter(o => o.status === "PENDING").length;
@@ -188,7 +211,27 @@ export default function PharmacyQueuePage() {
     >
       {message && <SuccessBanner message={message} onDismiss={() => setMessage("")} />}
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">
+              Medicine Inventory Management
+            </h2>
+            <p className="text-sm font-medium text-slate-600">
+              Add new medicines, update stock, manage availability, and monitor expiry.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("add")}
+            className="flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3 text-sm font-black text-white shadow-lg transition hover:bg-teal-500"
+          >
+            <Plus className="h-5 w-5" />
+            Add Medicine
+          </button>
+        </div>
+
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <MetricCard label="Pending Rx"      value={pendingRx}        icon={<Clock         className="h-5 w-5" />} deltaType={pendingRx > 0 ? "increase" : "neutral"} />
         <MetricCard label="Dispensed"       value={dispensedRx}      icon={<CheckSquare   className="h-5 w-5" />} />
         <MetricCard label="Low Stock"       value={lowStock}         icon={<AlertOctagon  className="h-5 w-5" />} deltaType={lowStock > 0 ? "decrease" : "neutral"} />
@@ -201,7 +244,7 @@ export default function PharmacyQueuePage() {
         {activeTab === "queue" && (
           <Panel title="Prescription Queue" subtitle={`${pendingRx} pending — from doctor consultations`}>
             <div className="mb-4 flex justify-end">
-              <button onClick={load} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-teal-400 hover:text-teal-700">
+              <button onClick={() => load()} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-teal-400 hover:text-teal-700">
                 <RefreshCw className="h-4 w-4" /> Refresh
               </button>
             </div>
@@ -251,9 +294,10 @@ export default function PharmacyQueuePage() {
         {activeTab === "inventory" && (
           <Panel title="Medicine Inventory" subtitle={`${medicines.length} medicines`}>
             <div className="mb-4 flex justify-end">
-              <button onClick={load} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-teal-400 hover:text-teal-700">
-                <RefreshCw className="h-4 w-4" /> Refresh
-              </button>
+              
+            <button onClick={() => load()} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-teal-400 hover:text-teal-700">
+              <RefreshCw className="h-4 w-4" /> Refresh
+            </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] border-collapse text-sm">
@@ -272,7 +316,7 @@ export default function PharmacyQueuePage() {
                       <td className={`px-4 py-3 font-black tabular-nums ${med.quantity <= (med.reorder_level ?? 0) ? "text-red-600" : "text-slate-900"}`}>{med.quantity}</td>
                       <td className="px-4 py-3 text-slate-500">{med.reorder_level ?? "—"}</td>
                       <td className="px-4 py-3 font-bold text-teal-700">{med.price}</td>
-                      <td className={`px-4 py-3 text-sm ${med.expiry_date && (new Date(med.expiry_date).getTime() - Date.now()) / 86400000 <= 90 ? "font-bold text-amber-600" : "text-slate-500"}`}>
+                      <td className={`px-4 py-3 text-sm ${med.expiry_date && getDaysUntil(med.expiry_date) <= 90 ? "font-bold text-amber-600" : "text-slate-500"}`}>
                         {med.expiry_date ?? "—"}
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={med.is_available ? "ACTIVE" : "INACTIVE"} /></td>
@@ -324,7 +368,7 @@ export default function PharmacyQueuePage() {
         {activeTab === "orders" && (
           <Panel title="Public Orders" subtitle={`${pendingOrders} pending`}>
             <div className="mb-4 flex justify-end">
-              <button onClick={load} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-teal-400 hover:text-teal-700">
+              <button onClick={() => load()} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-teal-400 hover:text-teal-700">
                 <RefreshCw className="h-4 w-4" /> Refresh
               </button>
             </div>
@@ -416,14 +460,14 @@ export default function PharmacyQueuePage() {
               <div className="grid gap-3">
                 {medicines.filter(m => {
                   if (!m.expiry_date) return false;
-                  const d = (new Date(m.expiry_date).getTime() - Date.now()) / 86400000;
+                  const d = getDaysUntil(m.expiry_date);
                   return d <= 90 && d > 0;
                 }).length === 0 && (
                   <p className="rounded-2xl bg-emerald-50 p-6 text-center font-bold text-emerald-700">No near-expiry items ✓</p>
                 )}
                 {medicines.filter(m => {
                   if (!m.expiry_date) return false;
-                  const d = (new Date(m.expiry_date).getTime() - Date.now()) / 86400000;
+                  const d = getDaysUntil(m.expiry_date);
                   return d <= 90 && d > 0;
                 }).map(med => (
                   <div key={med.id} className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3">
@@ -442,7 +486,7 @@ export default function PharmacyQueuePage() {
         {activeTab === "vendors" && (
           <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
             <Panel title="Add Vendor" subtitle="Register a new supplier">
-              <form onSubmit={addVendor} className="grid gap-4">
+              <form onSubmit={addVendor} className="grid gap-4 pb-2">
                 {[
                   { label: "Vendor Name *", key: "name",    type: "text",  placeholder: "e.g. MediSupply BD",  required: true },
                   { label: "Contact Phone", key: "contact", type: "tel",   placeholder: "+880 1xxx xxxxxx",     required: false },
@@ -455,13 +499,24 @@ export default function PharmacyQueuePage() {
                       onChange={e => setVendorForm(p => ({ ...p, [f.key]: e.target.value }))} />
                   </div>
                 ))}
-                <button
-                  type="submit"
-                  disabled={vendorLoading}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--brand)] h-11 font-bold text-white transition-colors hover:brightness-95 disabled:opacity-60">
-                  {vendorLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                  {vendorLoading ? "Adding…" : "Add Vendor"}
-                </button>
+                <div className={stickyActionBoxCls}>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-xs font-black uppercase tracking-wide text-slate-600">
+                      Primary Action
+                    </p>
+                    <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-black text-teal-700">
+                      Always visible
+                    </span>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={vendorLoading}
+                    className={primaryActionBtnCls}
+                  >
+                    {vendorLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                    {vendorLoading ? "Adding Vendor…" : "Add Vendor"}
+                  </button>
+                </div>
               </form>
             </Panel>
             <Panel title="Vendor Directory" subtitle={`${vendors.length} registered suppliers`}>
@@ -495,7 +550,7 @@ export default function PharmacyQueuePage() {
         {activeTab === "add" && (
           <div className="grid gap-6 xl:grid-cols-[500px_1fr]">
             <Panel title="Add Medicine to Catalogue" subtitle="Appears immediately on the public pharmacy page">
-              <form onSubmit={addMedicine} className="grid gap-4">
+              <form onSubmit={addMedicine} className="grid gap-4 pb-2">
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">Medicine Name *</label>
                   <input required className={inputCls} value={addForm.name}
@@ -551,13 +606,24 @@ export default function PharmacyQueuePage() {
                     onChange={e => setAddForm(f => ({ ...f, description: e.target.value }))}
                     placeholder="Short description…" />
                 </div>
-                <button
-                  type="submit"
-                  disabled={addLoading}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--brand)] h-11 font-bold text-white transition-colors hover:brightness-95 disabled:opacity-60">
-                  {addLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                  {addLoading ? "Adding…" : "Add Medicine to Catalogue"}
-                </button>
+                <div className={stickyActionBoxCls}>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-xs font-black uppercase tracking-wide text-slate-600">
+                      Primary Action
+                    </p>
+                    <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-black text-teal-700">
+                      Always visible
+                    </span>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={addLoading}
+                    className={primaryActionBtnCls}
+                  >
+                    {addLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                    {addLoading ? "Adding Medicine…" : "Add Medicine to Catalogue"}
+                  </button>
+                </div>
               </form>
             </Panel>
             <Panel title="Image URL Tips" subtitle="How to get good medicine images">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { apiFetch } from "@/lib/apiFetch";
 import {
-  ClipboardList, Calendar, UserCheck, BarChart3, Stethoscope, Loader2, Users,
+  ClipboardList, Calendar, UserCheck, BarChart3, Stethoscope, Loader2, Users, UserPlus,
 } from "lucide-react";
 import { DashboardShell, type TabItem } from "@/components/dashboard/DashboardShell";
 import { MetricCard } from "@/components/dashboard/MetricCard";
@@ -48,6 +48,9 @@ const DEPARTMENTS = [
   "General Medicine", "Cardiology", "Orthopedics",
   "Pediatrics", "Neurology", "Emergency / Trauma",
 ];
+
+const visibleRegisterButtonCls =
+  "flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-teal-900 px-6 text-base font-black text-white shadow-xl transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70";
 
 function Empty({ text }: { text: string }) {
   return <p className="rounded-2xl bg-slate-50 p-8 text-center text-sm text-slate-400">{text}</p>;
@@ -98,9 +101,8 @@ export default function ReceptionDashboardPage() {
     if (data.success) {
       setAppointments(prev => [data.appointment, ...prev]);
       setMessage(`Registered: ${data.patient.patient_code} — Appointment ${data.appointment.appointment_code}`);
-      setRegForm({ full_name: "", age: "", phone: "", email: "", department: "", symptoms: "" });
 
-      // Add walk-in queue entry
+      // Add walk-in queue entry before clearing the form.
       const wiRes = await apiFetch("/api/reception/walk-in", {
         method: "POST",
         body: JSON.stringify({
@@ -112,6 +114,8 @@ export default function ReceptionDashboardPage() {
       });
       const wiData = await wiRes.json();
       if (wiData.success) setWalkIns(prev => [...prev, wiData.walkIn]);
+
+      setRegForm({ full_name: "", age: "", phone: "", email: "", department: "", symptoms: "" });
     } else {
       setMessage(data.error ?? "Registration failed");
     }
@@ -148,7 +152,6 @@ export default function ReceptionDashboardPage() {
     setToggling(id);
     const doc = doctors.find(d => d.id === id);
     if (!doc) { setToggling(null); return; }
-    const supabase = createClient();
     await apiFetch("/api/reception/toggle-doctor", { method: "PATCH", body: JSON.stringify({ doctor_id: id, is_available: !doc.is_available }) });
     setDoctors(prev => prev.map(d => d.id === id ? { ...d, is_available: !d.is_available } : d));
     setToggling(null);
@@ -193,7 +196,7 @@ export default function ReceptionDashboardPage() {
         {activeTab === "registration" && (
           <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
             <form onSubmit={registerPatient}
-              className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow)]">
+              className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-6 pb-10 shadow-[var(--shadow)]">
               <h2 className="text-2xl font-bold text-[var(--ink)]">Register Walk-In Patient</h2>
               <div className="mt-5 grid gap-4">
                 <input
@@ -225,11 +228,26 @@ export default function ReceptionDashboardPage() {
                   className="min-h-24 w-full rounded-[var(--radius-sm)] border border-[var(--line)] p-3 text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-tint)]"
                   placeholder="Symptoms / Reason for visit" value={regForm.symptoms}
                   onChange={e => setRegForm({ ...regForm, symptoms: e.target.value })} />
-                <button
-                  disabled={registering}
-                  className="rounded-[var(--radius-sm)] bg-[var(--brand)] p-3 font-semibold text-white hover:brightness-95 disabled:opacity-50">
-                  {registering ? "Registering…" : "Register & Add to Queue"}
-                </button>
+
+                {/* Bug 18 fix: do not depend on var(--brand). Use explicit visible colors. */}
+                <div className="sticky bottom-4 z-50 mt-3 rounded-2xl border border-teal-300 bg-teal-50 p-3 shadow-2xl">
+                  <p className="mb-2 text-center text-xs font-black uppercase tracking-wide text-teal-900">
+                    Primary Action
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={registering}
+                    className={visibleRegisterButtonCls}
+                    style={{ backgroundColor: "#0f766e", color: "#ffffff" }}
+                  >
+                    {registering ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <UserPlus className="h-5 w-5" />
+                    )}
+                    {registering ? "Registering Patient…" : "Register Patient & Add to Queue"}
+                  </button>
+                </div>
               </div>
             </form>
             <Panel title="Recent Walk-Ins" subtitle="Added this session">
