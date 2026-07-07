@@ -33,6 +33,7 @@ export const departments = [
   "Radiology",
   "Gynecology / Obstetrics",
   "General Medicine",
+  "Dermatology",
   "Laboratory Services",
   "Pharmacy",
 ];
