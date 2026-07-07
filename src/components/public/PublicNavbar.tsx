@@ -38,50 +38,52 @@ export default function PublicNavbar() {
       className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6"
     >
       <nav
-        className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/30 px-4 py-3 shadow-soft transition-all duration-300 sm:px-6"
+        className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/40 px-4 py-3 shadow-soft transition-all duration-300 sm:px-6"
         style={{
           background: scrolled
             ? "oklch(0.98 0.012 215 / 0.96)"
-            : "oklch(0.98 0.012 215 / 0.88)",
+            : "oklch(0.98 0.012 215 / 0.9)",
           backdropFilter: "blur(24px) saturate(180%)",
           WebkitBackdropFilter: "blur(24px) saturate(180%)",
         }}
       >
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white shadow-soft">
-            <Image
-              src="/medilink-logo.png"
-              alt="Medilink Health Care Logo"
-              fill
-              sizes="40px"
-              className="object-contain p-1"
-              priority
-            />
+        <Link href="/" className="flex items-center gap-3">
+          <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-cyan-50 to-blue-100 p-[3px] shadow-[0_10px_28px_rgba(14,116,144,0.22)] ring-1 ring-cyan-200/70">
+            <span className="relative h-full w-full overflow-hidden rounded-full bg-white">
+              <Image
+                src="/medilink-logo.png"
+                alt="Medilink Health Care Logo"
+                fill
+                sizes="48px"
+                className="scale-110 object-cover"
+                priority
+              />
+            </span>
           </span>
 
           <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-bold tracking-tight text-foreground">
+            <span className="font-display text-lg font-black tracking-tight text-foreground">
               Medilink
             </span>
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.28em] text-muted-foreground">
               Health Care
             </span>
           </span>
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
-          {publicNavLinks.map((l) => (
+          {publicNavLinks.map((link) => (
             <Link
-              key={l.href}
-              href={l.href}
+              key={link.href}
+              href={link.href}
               className={[
                 "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                pathname === l.href
+                pathname === link.href
                   ? "bg-primary/10 text-primary"
                   : "text-foreground/80 hover:bg-primary/10 hover:text-primary",
               ].join(" ")}
             >
-              {l.label}
+              {link.label}
             </Link>
           ))}
         </div>
@@ -125,7 +127,8 @@ export default function PublicNavbar() {
           )}
 
           <button
-            onClick={() => setOpen((v) => !v)}
+            type="button"
+            onClick={() => setOpen((value) => !value)}
             aria-label="Toggle menu"
             className="flex h-9 w-9 items-center justify-center rounded-xl text-foreground/80 transition-colors hover:bg-primary/10 lg:hidden"
           >
@@ -148,19 +151,19 @@ export default function PublicNavbar() {
             }}
           >
             <div className="flex flex-col gap-1">
-              {publicNavLinks.map((l) => (
+              {publicNavLinks.map((link) => (
                 <Link
-                  key={l.href}
-                  href={l.href}
+                  key={link.href}
+                  href={link.href}
                   onClick={() => setOpen(false)}
                   className={[
                     "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    pathname === l.href
+                    pathname === link.href
                       ? "bg-primary/10 text-primary"
                       : "text-foreground/80 hover:bg-primary/10 hover:text-primary",
                   ].join(" ")}
                 >
-                  {l.label}
+                  {link.label}
                 </Link>
               ))}
 
