@@ -99,6 +99,13 @@ const departments = [
     bg: "/departments/laboratory.png",
   },
   {
+    name: "Dermatology",
+    desc: "Skin, hair, allergy & aesthetic care by specialist dermatologists.",
+    color: "#f472b6",
+    tags: ["Skin Care", "Hair Loss", "Allergy", "Aesthetics"],
+    bg: "/departments/dermatology.png",
+  },
+  {
     name: "Pharmacy",
     desc: "On-site dispensary integrated with prescriptions & insurance.",
     color: "#14b8a6",

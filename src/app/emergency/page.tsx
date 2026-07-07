@@ -8,12 +8,12 @@ import { Phone, Ambulance, Clock, MapPin, AlertTriangle, HeartPulse, Bed } from 
 
 const emergencyContacts = [
   { label: "Emergency Hotline",  number: "+880 1999 123456", icon: Phone,      color: "#ef4444", note: "24/7 — Call immediately for life-threatening situations" },
-  { label: "Ambulance Dispatch", number: "+880 1712 889911", icon: Ambulance,  color: "#f97316", note: "GPS-tracked ambulances, avg 8-min response time" },
+  { label: "Ambulance Dispatch", number: "+880 1712 889911", icon: Ambulance,  color: "#f97316", note: "GPS-tracked ambulances, avg 20-min response time" },
   { label: "General Helpline",   number: "+880 1712 889900", icon: HeartPulse, color: "#0ea5e9", note: "Mon–Sat 8am–8pm for non-emergency enquiries" },
 ];
 
 const steps = [
-  { step: "1", title: "Call us immediately",      desc: "Dial our 24/7 emergency number. Our team picks up within 3 rings." },
+  { step: "1", title: "Call us immediately",      desc: "Dial our 24/7 emergency number. Our team picks up within shortest Possible Time." },
   { step: "2", title: "Share your location",       desc: "Tell us your exact address or drop a live location pin." },
   { step: "3", title: "We dispatch an ambulance", desc: "Nearest unit is dispatched in under 2 minutes with trained paramedics." },
   { step: "4", title: "Hospital is pre-notified", desc: "The ER team is alerted before you arrive so they're ready." },

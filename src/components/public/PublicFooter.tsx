@@ -102,13 +102,8 @@ export default function PublicFooter() {
                 <Activity size={22} strokeWidth={2.4} />
               </span>
 
-              <span className="flex flex-col leading-none">
-                <span className="font-display text-lg font-bold text-foreground">
-                  {hospitalInfo.name}
-                </span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Health Care
-                </span>
+              <span className="font-display text-lg font-bold text-foreground">
+                {hospitalInfo.name}
               </span>
             </Link>
 
