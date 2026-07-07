@@ -31,10 +31,41 @@ export default function StaffLoginPage() {
   const [form, setForm]       = useState({ email:"", password:"" });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
+  const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
+  const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(p => ({ ...p, [k]: e.target.value }));
 
+  const validateEmail = (email: string): string | undefined => {
+    if (!email.trim()) return "Email is required";
+    if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)) return "Please enter a valid email address";
+    return undefined;
+  };
+
+  const validatePassword = (password: string): string | undefined => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters";
+    return undefined;
+  };
+
+  const validateForm = (): boolean => {
+    const emailError = validateEmail(form.email);
+    const passwordError = validatePassword(form.password);
+    setValidationErrors({ email: emailError, password: passwordError });
+    return !emailError && !passwordError;
+  };
+
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault(); setLoading(true); setError("");
+    e.preventDefault(); 
+    setLoading(true); 
+    setError("");
+    
+    // Validate form
+    if (!validateForm()) {
+      setTouched({ email: true, password: true });
+      setLoading(false);
+      return;
+    }
+    
     const supabase = createClient();
     const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
     if (signInError || !data.user) { setError("Invalid email or password."); setLoading(false); return; }
@@ -44,6 +75,15 @@ export default function StaffLoginPage() {
     if (!profile.is_active) { await supabase.auth.signOut(); setError("Your account is inactive. Contact Super Admin."); setLoading(false); return; }
     window.location.href = getDashboardRoute(profile.role);
   }
+
+  const handleBlur = (field: 'email' | 'password') => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    if (field === 'email') {
+      setValidationErrors(prev => ({ ...prev, email: validateEmail(form.email) }));
+    } else {
+      setValidationErrors(prev => ({ ...prev, password: validatePassword(form.password) }));
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -128,13 +168,31 @@ export default function StaffLoginPage() {
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-black uppercase tracking-widest text-[var(--ink-2)] mb-1.5">Staff Email</label>
-                <input type="email" required value={form.email} onChange={set("email")}
-                  placeholder="you@medilink.com" className="input-field" />
+                <input 
+                  type="email" 
+                  value={form.email} 
+                  onChange={set("email")}
+                  onBlur={() => handleBlur('email')}
+                  placeholder="you@medilink.com" 
+                  className={`input-field ${touched.email && validationErrors.email ? "border-red-400" : ""}`}
+                />
+                {touched.email && validationErrors.email && (
+                  <p className="mt-1.5 text-xs font-semibold text-red-500">{validationErrors.email}</p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-black uppercase tracking-widest text-[var(--ink-2)] mb-1.5">Password</label>
-                <input type="password" required value={form.password} onChange={set("password")}
-                  placeholder="••••••••" className="input-field" />
+                <input 
+                  type="password" 
+                  value={form.password} 
+                  onChange={set("password")}
+                  onBlur={() => handleBlur('password')}
+                  placeholder="••••••••" 
+                  className={`input-field ${touched.password && validationErrors.password ? "border-red-400" : ""}`}
+                />
+                {touched.password && validationErrors.password && (
+                  <p className="mt-1.5 text-xs font-semibold text-red-500">{validationErrors.password}</p>
+                )}
               </div>
               {error && (
                 <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{error}</div>
@@ -144,6 +202,11 @@ export default function StaffLoginPage() {
                 style={{ background:"linear-gradient(135deg,#0C1A27,#1B5FA8)" }}>
                 {loading ? <Loader2 className="h-5 w-5 animate-spin"/> : "Login to Portal"}
               </button>
+              <p className="text-center text-sm">
+                <Link href="/forgot-password" className="font-semibold text-[var(--primary)] hover:underline">
+                  Forgot password?
+                </Link>
+              </p>
             </form>
           </div>
 
